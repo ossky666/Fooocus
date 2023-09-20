@@ -79,6 +79,8 @@ model_filenames = [
 ]
 
 lora_filenames = [
+        ('sd_xl_offset_example-lora_1.0.safetensors',
+     'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_offset_example-lora_1.0.safetensors')
 ]
 
 vae_approx_filenames = [
