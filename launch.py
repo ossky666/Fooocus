@@ -70,17 +70,11 @@ def prepare_environment():
 
 
 model_filenames = [
-    ('sd_xl_base_1.0_0.9vae.safetensors',
-     'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0_0.9vae.safetensors'),
-    ('sd_xl_refiner_1.0_0.9vae.safetensors',
-     'https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/resolve/main/sd_xl_refiner_1.0_0.9vae.safetensors'),
-    ('dreamshaperXL10_alpha2Xl10.safetensors',
-     'https://civitai-delivery-worker-prod-2023-09-01.5ac0637cfd0766c97916cefa3764fbdf.r2.cloudflarestorage.com/53515/model/dreamshaperxl10alpha2.Ea78.safetensors?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22dreamshaperXL10_alpha2Xl10.safetensors%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=2fea663d76bd24a496545da373d610fc/20230920/us-east-1/s3/aws4_request&X-Amz-Date=20230920T020500Z&X-Amz-SignedHeaders=host&X-Amz-Signature=b52b14d54fd633987cd48428564d298b4a54f9c6ac8f6ef998d21c215c5f9141')
+    ('xxmix9realisticsdxl_v10.safetensors',
+     'https://civitai-delivery-worker-prod-2023-09-01.5ac0637cfd0766c97916cefa3764fbdf.r2.cloudflarestorage.com/model/438091/xxmix9realisticsdxlV1.TLjU.safetensors?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22xxmix9realisticsdxl_v10.safetensors%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=2fea663d76bd24a496545da373d610fc/20230920/us-east-1/s3/aws4_request&X-Amz-Date=20230920T023733Z&X-Amz-SignedHeaders=host&X-Amz-Signature=e294371fc8fe20673fe9951fd5844feae330d68e755adfc2f266a63868bc13d2')
 ]
 
 lora_filenames = [
-    ('sd_xl_offset_example-lora_1.0.safetensors',
-     'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_offset_example-lora_1.0.safetensors')
 ]
 
 vae_approx_filenames = [
