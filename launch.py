@@ -73,7 +73,9 @@ model_filenames = [
     ('sd_xl_base_1.0_0.9vae.safetensors',
      'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0_0.9vae.safetensors'),
     ('sd_xl_refiner_1.0_0.9vae.safetensors',
-     'https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/resolve/main/sd_xl_refiner_1.0_0.9vae.safetensors')
+     'https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/resolve/main/sd_xl_refiner_1.0_0.9vae.safetensors'),
+    ('4Guofeng4XL_v1125D.safetensors',
+     'https://civitai-delivery-worker-prod-2023-09-01.5ac0637cfd0766c97916cefa3764fbdf.r2.cloudflarestorage.com/75293/model/guofeng4125DBeta.5sqe.safetensors?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%224Guofeng4XL_v1125D.safetensors%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=2fea663d76bd24a496545da373d610fc/20230920/us-east-1/s3/aws4_request&X-Amz-Date=20230920T012846Z&X-Amz-SignedHeaders=host&X-Amz-Signature=fcdc8ada8d7c8c348adfed898b877f0d73d2a20d11d51129b909a89cfd909ba6')
 ]
 
 lora_filenames = [
