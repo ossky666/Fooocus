@@ -1,20 +1,28 @@
-import numpy as np
+import os.path
 
-from PIL import Image, ImageFilter, ImageOps
+import torch
+import numpy as np
+import modules.default_pipeline as pipeline
+
+from PIL import Image, ImageFilter
 from modules.util import resample_image
+from modules.path import inpaint_models_path
+
+
+inpaint_head = None
+
+
+class InpaintHead(torch.nn.Module):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.head = torch.nn.Parameter(torch.empty(size=(320, 5, 3, 3), device='cpu'))
+
+    def __call__(self, x):
+        x = torch.nn.functional.pad(x, (1, 1, 1, 1), "replicate")
+        return torch.nn.functional.conv2d(input=x, weight=self.head)
 
 
 current_task = None
-
-
-def morphological_soft_open(x):
-    k = 12
-    x = Image.fromarray(x)
-    for _ in range(k):
-        x = x.filter(ImageFilter.MaxFilter(3))
-    x = x.filter(ImageFilter.BoxBlur(k * 2 + 1))
-    x = np.array(x)
-    return x
 
 
 def box_blur(x, k):
@@ -23,17 +31,19 @@ def box_blur(x, k):
     return np.array(x)
 
 
-def threshold_0_255(x):
-    y = np.zeros_like(x)
-    y[x > 127] = 255
-    return y
+def max33(x):
+    x = Image.fromarray(x)
+    x = x.filter(ImageFilter.MaxFilter(3))
+    return np.array(x)
 
 
-def morphological_hard_open(x):
-    y = threshold_0_255(x)
-    z = morphological_soft_open(x)
-    z[y > 127] = 255
-    return z
+def morphological_open(x):
+    x_int32 = np.zeros_like(x).astype(np.int32)
+    x_int32[x > 127] = 256
+    for _ in range(32):
+        maxed = max33(x_int32) - 8
+        x_int32 = np.maximum(maxed, x_int32)
+    return x_int32.clip(0, 255).astype(np.uint8)
 
 
 def imsave(x, path):
@@ -81,7 +91,12 @@ def solve_abcd(x, a, b, c, d, k, outpaint):
     if outpaint:
         return 0, H, 0, W
     min_area = H * W * k
-    while area_abcd(a, b, c, d) < min_area:
+    max_area = H * W
+    while True:
+        if area_abcd(a, b, c, d) > min_area and abs((b - a) - (d - c)) < 16:
+            break
+        if area_abcd(a, b, c, d) >= max_area:
+            break
         if (b - a) < (d - c):
             a -= 1
             b += 1
@@ -109,21 +124,20 @@ def fooocus_fill(image, mask):
 class InpaintWorker:
     def __init__(self, image, mask, is_outpaint):
         # mask processing
-        self.image_raw = fooocus_fill(image, mask)
-        self.mask_raw_user_input = mask
-        self.mask_raw_soft = morphological_hard_open(mask)
+        self.mask_raw_soft = morphological_open(mask)
         self.mask_raw_fg = (self.mask_raw_soft == 255).astype(np.uint8) * 255
         self.mask_raw_bg = (self.mask_raw_soft == 0).astype(np.uint8) * 255
         self.mask_raw_trim = 255 - np.maximum(self.mask_raw_fg, self.mask_raw_bg)
-        self.mask_raw_error = (self.mask_raw_user_input > self.mask_raw_fg).astype(np.uint8) * 255
+
+        # image processing
+        self.image_raw = fooocus_fill(image, self.mask_raw_fg)
 
         # log all images
-        # imsave(self.mask_raw_user_input, 'mask_raw_user_input.png')
+        # imsave(self.image_raw, 'image_raw.png')
         # imsave(self.mask_raw_soft, 'mask_raw_soft.png')
         # imsave(self.mask_raw_fg, 'mask_raw_fg.png')
         # imsave(self.mask_raw_bg, 'mask_raw_bg.png')
         # imsave(self.mask_raw_trim, 'mask_raw_trim.png')
-        # imsave(self.mask_raw_error, 'mask_raw_error.png')
 
         # compute abcd
         a, b, c, d = compute_initial_abcd(self.mask_raw_bg < 127)
@@ -148,7 +162,27 @@ class InpaintWorker:
         # ending
         self.latent = None
         self.latent_mask = None
-        self.uc_guidance = None
+        self.inpaint_head_feature = None
+        return
+
+    def load_inpaint_guidance(self, latent, mask, model_path):
+        global inpaint_head
+        if inpaint_head is None:
+            inpaint_head = InpaintHead()
+            sd = torch.load(model_path, map_location='cpu')
+            inpaint_head.load_state_dict(sd)
+        process_latent_in = pipeline.xl_base_patched.unet.model.process_latent_in
+
+        latent = process_latent_in(latent)
+        B, C, H, W = latent.shape
+
+        mask = torch.nn.functional.interpolate(mask, size=(H, W), mode="bilinear")
+        mask = mask.round()
+
+        feed = torch.cat([mask, latent], dim=1)
+
+        inpaint_head.to(device=feed.device, dtype=feed.dtype)
+        self.inpaint_head_feature = inpaint_head(feed)
         return
 
     def load_latent(self, latent, mask):

@@ -1,7 +1,5 @@
 import threading
 
-import numpy as np
-import torch
 
 buffer = []
 outputs = []
@@ -10,6 +8,8 @@ outputs = []
 def worker():
     global buffer, outputs
 
+    import numpy as np
+    import torch
     import time
     import shared
     import random
@@ -55,6 +55,7 @@ def worker():
         outpaint_selections = [o.lower() for o in outpaint_selections]
 
         loras = [(l1, w1), (l2, w2), (l3, w3), (l4, w4), (l5, w5)]
+        loras_user_raw_input = copy.deepcopy(loras)
 
         raw_style_selections = copy.deepcopy(style_selections)
 
@@ -195,6 +196,10 @@ def worker():
                     # outputs.append(['results', inpaint_worker.current_task.visualize_mask_processing()])
                     # return
 
+                    progressbar(0, 'Downloading inpainter ...')
+                    inpaint_head_model_path, inpaint_patch_model_path = modules.path.downloading_inpaint_models()
+                    loras += [(inpaint_patch_model_path, 1.0)]
+
                     inpaint_pixels = core.numpy_to_pytorch(inpaint_worker.current_task.image_ready)
                     progressbar(0, 'VAE encoding ...')
                     initial_latent = core.encode_vae(vae=pipeline.xl_base_patched.vae, pixels=inpaint_pixels)
@@ -203,9 +208,23 @@ def worker():
                     inpaint_mask = core.numpy_to_pytorch(inpaint_worker.current_task.mask_ready[None])
                     inpaint_mask = torch.nn.functional.avg_pool2d(inpaint_mask, (8, 8))
                     inpaint_mask = torch.nn.functional.interpolate(inpaint_mask, (H, W), mode='bilinear')
-                    width = W * 8
-                    height = H * 8
                     inpaint_worker.current_task.load_latent(latent=inpaint_latent, mask=inpaint_mask)
+
+                    progressbar(0, 'VAE inpaint encoding ...')
+
+                    inpaint_mask = (inpaint_worker.current_task.mask_ready > 0).astype(np.float32)
+                    inpaint_mask = torch.tensor(inpaint_mask).float()
+
+                    vae_dict = core.encode_vae_inpaint(
+                        mask=inpaint_mask, vae=pipeline.xl_base_patched.vae, pixels=inpaint_pixels)
+
+                    inpaint_latent = vae_dict['samples']
+                    inpaint_mask = vae_dict['noise_mask']
+                    inpaint_worker.current_task.load_inpaint_guidance(latent=inpaint_latent, mask=inpaint_mask, model_path=inpaint_head_model_path)
+
+                    B, C, H, W = inpaint_latent.shape
+                    height, width = inpaint_worker.current_task.image_raw.shape[:2]
+                    print(f'Final resolution is {str((height, width))}, latent is {str((H * 8, W * 8))}.')
 
         progressbar(1, 'Initializing ...')
 
@@ -347,7 +366,7 @@ def worker():
                         ('Refiner Model', refiner_model_name),
                         ('Seed', task['task_seed'])
                     ]
-                    for n, w in loras:
+                    for n, w in loras_user_raw_input:
                         if n != 'None':
                             d.append((f'LoRA [{n}] weight', w))
                     log(x, d, single_line_number=3)
