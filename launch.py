@@ -56,9 +56,9 @@ model_filenames = [
      ('sd_xl_base_1.0_0.9vae.safetensors',
      'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0_0.9vae.safetensors'), 
     ('sdxl10ArienmixxlAsian_v20.safetensors',
-     'https://civitai-delivery-worker-prod-2023-09-01.5ac0637cfd0766c97916cefa3764fbdf.r2.cloudflarestorage.com/model/1353487/arienmixxlE4BA9AE6B4B2E4.9jDy.safetensors?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22sdxl10ArienmixxlAsian_v20.safetensors%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=2fea663d76bd24a496545da373d610fc/20230921/us-east-1/s3/aws4_request&X-Amz-Date=20230921T074526Z&X-Amz-SignedHeaders=host&X-Amz-Signature=7848ef57e2f5a926bcce37ccf690a43fbe833d09dcb28a3a2a3f077d4644c7d9'),
+     'https://download.tusiassets.com/users/CHECKPOINT/604033128088015653/Damb5DvvftcuLWX5U0V0b.safetensors?auth_key=1695362195-1512a9c5ffc04f40bb13f27967585653-0-931a6ad92a7955c282f735503b150106'),
     ('SDXLRonghua_v20.safetensors',
-     'https://civitai-delivery-worker-prod-2023-09-01.5ac0637cfd0766c97916cefa3764fbdf.r2.cloudflarestorage.com/model/118828/ronghuaV20.aXbE.safetensors?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22SDXLRonghua_v20.safetensors%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=2fea663d76bd24a496545da373d610fc/20230921/us-east-1/s3/aws4_request&X-Amz-Date=20230921T074239Z&X-Amz-SignedHeaders=host&X-Amz-Signature=b36c546dc31c376cbfe99f76eb629449c599bf108138c4fd99e3bc99c4e1cee3'),
+     'https://et-models.oss-cn-hongkong.aliyuncs.com/users%2FCHECKPOINT%2F624251051247281438%2F1qQmxtmVIt6ZoUMFUNIBw.safetensors?Expires=1695448702&OSSAccessKeyId=LTAI5tBbAjwxqXDiu1tuYuke&Signature=qCKFpzLi9%2FFYqDS2HWxwmp0N7Ek%3D'),
     ('sd_xl_refiner_1.0_0.9vae.safetensors',
      'https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/resolve/main/sd_xl_refiner_1.0_0.9vae.safetensors')
 ]
